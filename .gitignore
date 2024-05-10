@@ -1,0 +1,14 @@
+# Folders:
+.DS_Store/
+.vs/
+.vscode/
+bin/
+build/
+cache/
+log/
+obj/
+node_modules/
+
+# Files:
+*.csproj.user
+*~
