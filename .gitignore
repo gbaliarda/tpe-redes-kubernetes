@@ -12,3 +12,5 @@ node_modules/
 # Files:
 *.csproj.user
 *~
+
+.env
