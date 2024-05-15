@@ -13,4 +13,7 @@ node_modules/
 *.csproj.user
 *~
 
+# Istio
+istio-1.22.0
+
 .env
