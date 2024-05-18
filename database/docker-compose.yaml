@@ -10,6 +10,7 @@ services:
       - ./tables.sql:/docker-entrypoint-initdb.d/tables.sql
     env_file:
       - ./database.env
+    network_mode: host
 
 volumes:
   pg_database:
