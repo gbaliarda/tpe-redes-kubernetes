@@ -59,9 +59,41 @@ app.get("/user/:id", async (req, res) => {
 
 app.get("/", (req, res) => {
     res.status(200).json({
-        message: "API Express V1",
+        message: "API Express V2",
         podname: process.env.HOSTNAME,
     })
 })
+
+app.put("/user/:id", async (req, res) => {
+  const userId = parseInt(req.params.id);
+  const { username, password } = req.body;
+
+  try {
+    const query = "UPDATE users SET username = $1, password = $2 WHERE id = $3 RETURNING *";
+    const values = [username, password, userId];
+    const result = await pool.query(query, values);
+    const updatedUser = result.rows[0];
+
+    return res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return res.status(500).json({ message: "Error updating user." });
+  }
+});
+
+app.delete("/user/:id", async (req, res) => {
+  const userId = parseInt(req.params.id);
+
+  try {
+    const query = "DELETE FROM users WHERE id = $1";
+    await pool.query(query, [userId]);
+
+    return res.status(200).json({ message: "User deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return res.status(500).json({ message: "Error deleting user." });
+  }
+});
+
 
 app.listen(port, () => console.log(`Server is running on port ${port}`));

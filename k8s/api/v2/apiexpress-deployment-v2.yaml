@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: v2-apiexpress-deployment
+  labels:
+    app: v2-apiexpress
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: v2-apiexpress
+  template:
+    metadata:
+      labels:
+        app: v2-apiexpress
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: v2-apiexpress
+          image: apiexpress:v2
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
