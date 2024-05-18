@@ -1,0 +1,5 @@
+curl localhost:8080/v1
+
+curl -X POST -H "Content-Type: application/json" -d '{"username":"exampleuser", "password":"examplepassword"}' http://localhost:8080/v1/user
+
+curl http://localhost:8080/v1/user/1

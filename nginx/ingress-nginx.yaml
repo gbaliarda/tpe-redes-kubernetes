@@ -12,7 +12,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: apiexpress-service
+            name: v1-apiexpress-service
             port:
               number: 8080
   ingressClassName: nginx

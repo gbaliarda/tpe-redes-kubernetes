@@ -59,7 +59,7 @@ app.get("/user/:id", async (req, res) => {
 
 app.get("/", (req, res) => {
     res.status(200).json({
-        message: "API Express"
+        message: "API Express V1"
     })
 })
 
