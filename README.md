@@ -171,18 +171,19 @@ kind delete cluster --name redes-cluster
 
 ## Istio & Kiali
 
-To install istio, first delete the previously applied manifests. They will be reinstated after the installation is done:
+To install Istio, first delete the previously applied manifests. They will be reinstated after the installation is done:
 
 ```bash
 kubectl delete -f k8s/database
 kubectl delete -f k8s/api --recursive
+kubectl delete -f nginx
 ```
 
-Now. for the install we'll use the latest version (1.22). Otherwise, refer to the [Istio install page](https://istio.io/latest/docs/setup/getting-started/) to check the available options.
+We'll install the latest Istio version (1.22). To install a previous version, refer to the [Istio install page](https://istio.io/latest/docs/setup/getting-started/) to check the available options.
 
 ### Download Istio
 
-Firstly, download istio and add it to the path variable.
+Firstly, download Istio and add it to the path variable. Make sure to use Linux or MacOS, as the script is not compatible with Windows.
 
 ```sh
 curl -L https://istio.io/downloadIstio | sh -
@@ -190,7 +191,7 @@ cd istio-1.22.0
 export PATH=$PWD/bin:$PATH
 ```
 
-Optionally, said installation can be checked using the following command
+Optionally, said installation can be checked using the following command:
 
 ```sh
 istioctl x precheck
@@ -239,11 +240,19 @@ Prometheus is a tool that collects metrics from NGINX, and Grafana can be used t
 
 ### Install
 
+Before installing Prometheus and Grafana, make sure to have the NGINX controller and service running. If not, refer to steps 7 and 8 of the first section.
+
 To install Prometheus and Grafana run:
 
 ```sh
 kubectl apply --kustomize k8s/prometheus
 kubectl apply --kustomize k8s/grafana
+```
+
+You can check the running pods with:
+
+```bash
+kubectl get pods -n ingress-nginx
 ```
 
 Then, to access both Prometheus and Grafana we must get the *IP:PORT* of both, where *IP* refers to the cluster node monitored, and *PORT* to the port in which the service is run.
@@ -254,7 +263,9 @@ Firstly, to get the cluster nodes' IP run:
 kubectl get nodes -o wide
 ```
 
-Then, to get the services' port run:
+We need the IP from the INTERNAL-IP column.
+
+Then, to get the services' port run the following command:
 
 ```bash
 kubectl get svc -n ingress-nginx
