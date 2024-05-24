@@ -361,6 +361,10 @@ spec:
     port: 443
     protocol: TCP
     targetPort: https
+  - name: prometheus
+    port: 10254
+    protocol: TCP
+    targetPort: prometheus
   selector:
     app.kubernetes.io/component: controller
     app.kubernetes.io/instance: ingress-nginx
@@ -384,6 +388,10 @@ spec:
     name: https-webhook
     port: 443
     targetPort: webhook
+  - name: prometheus
+    port: 10254
+    protocol: TCP
+    targetPort: prometheus
   selector:
     app.kubernetes.io/component: controller
     app.kubernetes.io/instance: ingress-nginx
@@ -421,6 +429,9 @@ spec:
         app.kubernetes.io/name: ingress-nginx
         app.kubernetes.io/part-of: ingress-nginx
         app.kubernetes.io/version: 1.10.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "10254"
     spec:
       containers:
       - args:
@@ -433,7 +444,7 @@ spec:
         - --validating-webhook=:8443
         - --validating-webhook-certificate=/usr/local/certificates/cert
         - --validating-webhook-key=/usr/local/certificates/key
-        - --enable-metrics=false
+        - --enable-metrics=true
         env:
         - name: POD_NAME
           valueFrom:
@@ -472,6 +483,9 @@ spec:
           protocol: TCP
         - containerPort: 8443
           name: webhook
+          protocol: TCP
+        - containerPort: 10254
+          name: prometheus
           protocol: TCP
         readinessProbe:
           failureThreshold: 3

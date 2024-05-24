@@ -69,22 +69,24 @@ To delete your cluster you can run
 kind delete cluster --name redes-cluster
 ```
 
-# Istio & Kiali
+# Cluster Monitoring
+
+## Istio & Kiali
 
 To install istio, first delete the previously applied manifests. They will be reinstated after the installation is done:
 
 ```bash
 kubectl delete -f k8s/database
-kubectl delete -f k8s/api
+kubectl delete -f k8s/api --recursive
 ```
 
 Now. for the install we'll use the latest version (1.22). Otherwise, refer to the [Istio install page](https://istio.io/latest/docs/setup/getting-started/) to check the available options.
 
-## Download Istio
+### Download Istio
 
 Firstly, download istio and add it to the path variable.
 
-```
+```sh
 curl -L https://istio.io/downloadIstio | sh -
 cd istio-1.22.0
 export PATH=$PWD/bin:$PATH
@@ -92,41 +94,64 @@ export PATH=$PWD/bin:$PATH
 
 Optionally, said installation can be checked using the following command
 
-```
+```sh
 istioctl x precheck
 ```
 
-## Install Istio
+### Install Istio
 
 To install Istio, run the following command. We´ll use the _default_ configuration profile, but [others can be chosen](https://istio.io/latest/docs/setup/additional-setup/config-profiles/) based on the given case.
 
-```
+```sh
 istioctl install --set profile=default -y
-kubectl label namespace default istio-injection=enabled
 ```
 
-Now we can finally reinstate the previously removed manifests of the api and database, using:
+Then, we label the namespaces to let istio inject its sidecars for monitoring
 
+```sh
+kubectl label ns default istio-injection=enabled
+kubectl label ns ingress-nginx istio-injection=enabled
 ```
-kubectl apply -f k8s/api
+
+Now we can finally reinstate the previously removed manifests, using:
+
+```sh
+kubectl apply -f k8s/api --recursive
 kubectl apply -f k8s/database
 ```
 
-## Kiali
+The same goes for all of nginx setup commands
+
+### Kiali
 
 To install Kiali, add the manifest with the same procedure used for the api and database.
 
-```
+```sh
 kubectl apply -f k8s/kiali
 ```
 Then, init the kiali dashboard with istio to check the traffic on the cluster.
 
-```
+```sh
 istioctl dashboard kiali
 ```
 
-Furthermore, other cluster applications can be installed using the same set of commands. E.g. Prometheus can be installed just using the example file provided by Istio by running the following command.
+## Prometheus & Grafana
 
+Prometheus is a tool that collects metrics from NGINX, and Grafana can be used to make dashboards to visualize said data.
+
+### Install
+
+To install Prometheus and Grafana run:
+
+```sh
+kubectl apply --kustomize github.com/kubernetes/ingress-nginx/deploy/prometheus/
+kubectl apply --kustomize github.com/kubernetes/ingress-nginx/deploy/grafana/
 ```
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.18/samples/addons/prometheus.yaml
+
+## Traffic Monitoring
+
+Additionally, traffic through both apis on the cluster can be generated using:
+
+```sh
+while sleep 1; do curl "localhost:8080/v1" && curl "localhost:8080/v2"; done
 ```
