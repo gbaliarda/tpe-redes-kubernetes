@@ -144,9 +144,25 @@ Prometheus is a tool that collects metrics from NGINX, and Grafana can be used t
 To install Prometheus and Grafana run:
 
 ```sh
-kubectl apply --kustomize github.com/kubernetes/ingress-nginx/deploy/prometheus/
-kubectl apply --kustomize github.com/kubernetes/ingress-nginx/deploy/grafana/
+kubectl apply --kustomize k8s/prometheus
+kubectl apply --kustomize k8s/grafana
 ```
+
+Then, to access both Prometheus and Grafana we must get the *IP:PORT* of both, where *IP* refers to the cluster node monitored, and *PORT* to the port in which the service is run.
+
+Firstly, to get the cluster nodes' IP run:
+
+```bash
+kubectl get nodes -o wide
+```
+
+Then, to get the services' port run:
+
+```bash
+kubectl get svc -n ingress-nginx
+```
+
+Finally, a dashboard is provided for use with Grafana on *dashboard.json*, but a custom one can be created using any of the [provided nginx metrics](https://kubernetes.github.io/ingress-nginx/user-guide/monitoring/#exposed-metrics) on prometheus.
 
 ## Traffic Monitoring
 
