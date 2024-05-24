@@ -162,7 +162,20 @@ Then, to get the services' port run:
 kubectl get svc -n ingress-nginx
 ```
 
-Finally, a dashboard is provided for use with Grafana on *dashboard.json*, but a custom one can be created using any of the [provided nginx metrics](https://kubernetes.github.io/ingress-nginx/user-guide/monitoring/#exposed-metrics) on prometheus.
+### Grafana
+
+When accessing grafana, both user and password are required to enter, with _admin_ _admin_ as default values.
+
+Then, to load the dashboard on *dashboard.json* do the following steps:
+
+- Using the search bar, go to 'Data Sources'
+- Click on 'Add data source'
+- Select Prometheus
+- Enter the configuration details. The only mandatory one is to specify prometheus IP:PORT to access.
+- Click on 'Save and Test' at the end of the page.
+- Go back to the main menu, then click on '+' -> Add Dashboard -> Import Dashboard
+- Load the provided _dashboard.json_ file
+- Click "Import"
 
 ## Traffic Monitoring
 
