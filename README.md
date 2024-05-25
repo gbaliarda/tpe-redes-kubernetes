@@ -51,15 +51,10 @@ cp api/v2/.env.example api/v2/.env
 
 Adjust the values as needed, but the default values should work with the provided database configuration.
 
-To build the docker image for the V1 of the API, run the following command from the root of the project:
+To build the docker images for both versions of the API, run the following commands from the root of the project:
 
 ```bash
 docker build -t apiexpress:v1 api/v1
-```
-
-To build the docker image for the V2 of the API, run the following command from the root of the project:
-
-```bash
 docker build -t apiexpress:v2 api/v2
 ```
 
@@ -289,41 +284,44 @@ You can check the running pods with:
 kubectl get pods -n ingress-nginx
 ```
 
-Then, to access both Prometheus and Grafana we must get the *IP:PORT* of both, where *IP* refers to the cluster node monitored, and *PORT* to the port in which the service is run.
-
-Firstly, to get the cluster nodes' IP run:
-
-```bash
-kubectl get nodes -o wide
-```
-
-We need the IP from the INTERNAL-IP column.
-
 Then, to get the services' port run the following command:
 
 ```bash
 kubectl get svc -n ingress-nginx
 ```
 
-### Grafana
+### Grafana Dashboard
 
-When accessing grafana, both user and password are required to enter, with _admin_ _admin_ as default values.
+To access the Grafana dashboard, you must port-forward the service to your localhost:
 
-Then, to load the dashboard on *dashboard.json* do the following steps:
+```sh
+kubectl port-forward -n ingress-nginx service/grafana 3000:3000
+```
 
-- Using the search bar, go to 'Data Sources'
-- Click on 'Add data source'
-- Select Prometheus
-- Enter the configuration details. The only mandatory one is to specify prometheus IP:PORT to access.
-- Click on 'Save and Test' at the end of the page.
-- Go back to the main menu, then click on '+' -> Add Dashboard -> Import Dashboard
-- Load the provided _dashboard.json_ file
-- Click "Import"
+The Grafana dashboard will be accessible on `localhost:3000`, where the default user and password are both `admin`.
+
+To load the example dashboard from `dashboard.json`, follow these steps:
+
+1. Using the search bar, go to 'Data Sources'.
+2. Click on 'Add data source'.
+3. Select Prometheus.
+4. Enter the configuration details. The only mandatory one is the prometheus server URL.
+    
+   - To get this URL, run `kubectl get svc -n ingress-nginx` and get the CLUSTER-IP address of the `prometheus-server` service, as well as the PORT (the one at the left, which should be 9090).
+   - The URL will then look like this: `http://10.96.5.14:9090`.
+
+5. Click on 'Save and Test' at the end of the page.
+6. Go to Dashboards -> New -> Import -> Upload dashboard JSON file.
+7. Load the `dashboard.json` file located on the root of the project.
+8. Select a Prometheus data source (you should see the default prometheus data source created on step 4).
+9. Click "Import".
 
 ## Traffic Monitoring
 
-Additionally, traffic through both apis on the cluster can be generated using:
+Traffic on both apis running on the cluster can be generated using:
 
 ```sh
 while sleep 1; do curl "localhost:8080/v1" && curl "localhost:8080/v2"; done
 ```
+
+You should then be able to see the traffic on the monitoring tools.
