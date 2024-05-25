@@ -29,8 +29,16 @@ kind create cluster --config ./kind/cluster-config.yaml --name redes-cluster
 You can check your running clusters with:
 
 ```bash 
-kind get clusters 
+kind get clusters
 ```
+
+You can also check the nodes of the cluster with:
+
+```bash
+kubectl get nodes
+```
+
+You should see three nodes running: one control plane and two workers.
 
 ### 2. Build API Docker images
 
@@ -80,11 +88,21 @@ kubectl apply -f k8s/api/ --recursive
 
 ### 7. Create the Nginx controller
 
+Install the Nginx controller using the following command:
+
 ```bash
 kubectl apply -f ./nginx/controller-nginx.yaml
 ```
 
-### 8. Apply the Ingress configuration to the pods of the nginx controller
+This will create the `ingress-nginx` namespace. You can check the pods running in this namespace with:
+
+```bash
+kubectl get pods -n ingress-nginx
+```
+
+### 8. Apply the Ingress configuration to the nginx controller
+
+The following command will wait for the Nginx controller pod to be ready and then apply the Ingress configuration to it:
 
 ```bash
 kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=180s && kubectl apply -f ./nginx/ingress-nginx.yaml
@@ -92,11 +110,11 @@ kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.
 
 ### 9. Port forward the Nginx controller to your localhost
 
+The following command will allow you to access the Nginx controller (and hence the API) from your localhost:
+
 ```bash
 kubectl port-forward --namespace=ingress-nginx service/ingress-nginx-controller 8080:80
 ```
-
-This will allow you to access the API through the nginx controller.
 
 You can check the running pods with:
 
@@ -183,21 +201,26 @@ We'll install the latest Istio version (1.22). To install a previous version, re
 
 ### Download Istio
 
-Firstly, download Istio and add it to the path variable. Make sure to use Linux or MacOS, as the script is not compatible with Windows.
+Firstly, download Istio and add it to the path variable.
+- Linux or macOS:
+    ```sh
+    curl -L https://istio.io/downloadIstio | sh -
+    cd istio-1.22.0
+    # The command below adds istioctl to the PATH variable, but only for the current session.
+    # To make it permanent, add the bin folder to the PATH variable in the .bashrc or .bash_profile file.
+    export PATH=$PWD/bin:$PATH
+    ```
+- Windows:
+    1. Go to the [Istio releases page]() and download the latest version. We ran our tests on [v1.22.0](https://github.com/istio/istio/releases/download/1.22.0/istio-1.22.0-win.zip).
+    2. Edit the system environment variables and add the path to the `bin` folder of the extracted zip file.
 
-```sh
-curl -L https://istio.io/downloadIstio | sh -
-cd istio-1.22.0
-export PATH=$PWD/bin:$PATH
-```
-
-Optionally, said installation can be checked using the following command:
+To verify that Istio can be installed in the Kubernetes cluster run:
 
 ```sh
 istioctl x precheck
 ```
 
-### Install Istio
+### Install Istio in the cluster
 
 To install Istio, run the following command. We´ll use the _default_ configuration profile, but [others can be chosen](https://istio.io/latest/docs/setup/additional-setup/config-profiles/) based on the given case.
 
@@ -205,7 +228,7 @@ To install Istio, run the following command. We´ll use the _default_ configurat
 istioctl install --set profile=default -y
 ```
 
-Then, we label the namespaces to let istio inject its sidecars for monitoring
+Then, we label the namespaces to let istio inject its sidecars for monitoring:
 
 ```sh
 kubectl label ns default istio-injection=enabled
@@ -219,7 +242,13 @@ kubectl apply -f k8s/api --recursive
 kubectl apply -f k8s/database
 ```
 
-The same goes for all of nginx setup commands
+The same goes for all the nginx setup commands:
+
+```sh
+kubectl apply -f ./nginx/controller-nginx.yaml
+
+kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=180s && kubectl apply -f ./nginx/ingress-nginx.yaml
+```
 
 ### Kiali
 
@@ -228,11 +257,16 @@ To install Kiali, add the manifest with the same procedure used for the api and 
 ```sh
 kubectl apply -f k8s/kiali
 ```
-Then, init the kiali dashboard with istio to check the traffic on the cluster.
+
+Wait for the pod to be ready, and then init the kiali dashboard with istio to check the traffic on the cluster.
 
 ```sh
 istioctl dashboard kiali
 ```
+
+This will run the Kiali dashboard on `localhost:20001`, which can be accessed on the browser.
+
+**TODO**: add Prometheus installation instructions and then show how to see the Traffic Graph on Kiali, including images.
 
 ## Prometheus & Grafana
 
