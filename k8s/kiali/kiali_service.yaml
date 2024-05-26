@@ -105,6 +105,8 @@ data:
         root_namespace: istio-system
       tracing:
         enabled: false
+      prometheus:
+        url: http://prometheus-server.ingress-nginx.svc.cluster.local:9090
     identity:
       cert_file: ""
       private_key_file: ""

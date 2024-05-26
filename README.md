@@ -305,10 +305,7 @@ To load the example dashboard from `dashboard.json`, follow these steps:
 1. Using the search bar, go to 'Data Sources'.
 2. Click on 'Add data source'.
 3. Select Prometheus.
-4. Enter the configuration details. The only mandatory one is the prometheus server URL.
-    
-   - To get this URL, run `kubectl get svc -n ingress-nginx` and get the CLUSTER-IP address of the `prometheus-server` service, as well as the PORT (the one at the left, which should be 9090).
-   - The URL will then look like this: `http://10.96.5.14:9090`.
+4. Enter the configuration details. The only mandatory one is the prometheus server URL, which should be `http://prometheus-server.ingress-nginx.svc.cluster.local:9090`
 
 5. Click on 'Save and Test' at the end of the page.
 6. Go to Dashboards -> New -> Import -> Upload dashboard JSON file.
