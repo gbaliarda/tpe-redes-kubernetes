@@ -346,10 +346,6 @@ kubectl apply -f ./nginx/controller-nginx.yaml
 kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=180s && kubectl apply -f ./nginx/ingress-nginx.yaml
 ```
 
-This will run the Kiali dashboard on `localhost:20001`, which can be accessed on the browser.
-
-**TODO**: add Prometheus installation instructions and then show how to see the Traffic Graph on Kiali, including images.
-
 ## Prometheus & Grafana
 
 Prometheus is a tool that collects metrics from NGINX, and Grafana can be used to make dashboards to visualize said data.
