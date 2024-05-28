@@ -21,6 +21,92 @@
 - `kind`
 - `istio`
 
+### Install Docker
+
+Obtaining Docker Certificates and Keys for Ubuntu
+
+```bash
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+```
+
+Install the latest version:
+
+```bash
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+Verify installation:
+
+```bash
+sudo docker run hello-world
+```
+
+To avoid using Docker as root:
+
+Create docker group:
+
+```bash
+sudo groupadd docker
+```
+
+Add user to docker group:
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+Log out and back in, or run:
+
+```bash
+newgrp docker
+```
+
+### Install kubectl
+
+Using curl:
+
+```bash
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+```
+
+Install kubectl:
+
+```bash
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+```
+
+### Install kind
+
+Using curl:
+
+```bash
+[ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.22.0/kind-linux-amd64
+```
+
+Change permissions:
+
+```bash
+chmod +x ./kind
+```
+
+Move kind to `/usr/local/bin`:
+
+```bash
+sudo mv ./kind /usr/local/bin/kind
+```
+
 # Installation
 
 ## Setup database
