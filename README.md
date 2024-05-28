@@ -283,7 +283,7 @@ kind delete cluster --name redes-cluster
 
 # Cluster Monitoring
 
-## Istio & Kiali
+## Istio
 
 To install Istio, first delete the previously applied manifests. They will be reinstated after the installation is done:
 
@@ -344,20 +344,6 @@ The same goes for all the nginx setup commands:
 kubectl apply -f ./nginx/controller-nginx.yaml
 
 kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=180s && kubectl apply -f ./nginx/ingress-nginx.yaml
-```
-
-### Kiali
-
-To install Kiali, add the manifest with the same procedure used for the api and database.
-
-```sh
-kubectl apply -f k8s/kiali
-```
-
-Wait for the pod to be ready, and then init the kiali dashboard with istio to check the traffic on the cluster.
-
-```sh
-istioctl dashboard kiali
 ```
 
 This will run the Kiali dashboard on `localhost:20001`, which can be accessed on the browser.
@@ -424,12 +410,43 @@ To load the example dashboard from `dashboard.json`, follow these steps:
 
 <img loading="lazy" src="images/dashboard_screen.png" alt="Home page with dashboard" />
 
-## Traffic Monitoring
+## Kiali
 
-Traffic on both apis running on the cluster can be generated using:
+Kiali is an observavility console for Istio, letting us understand the structure and health of the service mesh by monitoring traffic flow to infer the topology and report errors.
+
+### Install
+
+To install Kiali, add the manifest with the same procedure used for the api and database.
+
+```sh
+kubectl apply -f k8s/kiali
+```
+
+Prometheus must also be installed, as Kiali uses its metrics to operate. In case the 'Prometheus & Grafana' section install step was skipped, install Prometheus using:
+
+```sh
+kubectl apply --kustomize k8s/prometheus
+```
+
+### Run
+
+Wait for the pod to be ready, and then init the kiali dashboard with istio to check the traffic on the cluster.
+
+```sh
+istioctl dashboard kiali
+```
+
+Then, you will be prompted to Kiali UI on the url `http://localhost:20001`. There, you can monitor multiple things such as the _Traffic Graph_, which should be as follows:
+
+<img loading="lazy" src="images/traffic_graph.png" alt="Kiali traffic graph" />
+
+It should be noted that there must be traffic present on the cluster, otherwise the previous graph will only contain idle nodes. Said traffic can be generated using the command shown on the following section.
+
+
+## Generating Traffic
+
+Traffic through both apis running on the cluster can be generated using:
 
 ```sh
 while sleep 1; do curl "localhost:8080/v1" && curl "localhost:8080/v2"; done
 ```
-
-You should then be able to see the traffic on the monitoring tools.
