@@ -1,10 +1,25 @@
+# Authors
+
+- Baliarda Gonzalo
+- Birsa Nicolás
+- Perez Ezequiel Agustín
+- Ye Li Valentín
+
 # Assignment
 
-TODO.
+- Create a Kubernetes cluster with one Master and at least two slaves, exposing an API on a generic port (different from 80).
+- Implement a local database on a server (outside the cluster) and expose a service that redirects cluster traffic to the server.
+- Deploy a web server (nginx or Apache HTTPD listening on port 80) and set up a reverse proxy to the API.
+- Show two different versions of the API coexisting.
+- Integrate Istio and Kiali services into the cluster.
 
 # Pre-requisites
 
-TODO.
+- `docker`
+- `docker compose`
+- `kubectl`
+- `kind`
+- `istio`
 
 # Installation
 
