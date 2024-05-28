@@ -174,7 +174,7 @@
           "format": "time_series",
           "instant": false,
           "intervalFactor": 1,
-          "legendFormat": "{{instance}} accepted",
+          "legendFormat": "Accepted",
           "refId": "A"
         },
         {
@@ -187,7 +187,7 @@
           "format": "time_series",
           "instant": false,
           "intervalFactor": 1,
-          "legendFormat": "{{instance}} handled",
+          "legendFormat": "Handled",
           "refId": "B"
         }
       ],
@@ -287,7 +287,7 @@
           "expr": "nginx_ingress_controller_nginx_process_connections{state=\"active\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{instance}} active",
+          "legendFormat": "Active",
           "range": true,
           "refId": "A"
         },
@@ -300,7 +300,7 @@
           "expr": "nginx_ingress_controller_nginx_process_connections{state=\"reading\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{instance}} reading",
+          "legendFormat": "Reading",
           "range": true,
           "refId": "B"
         },
@@ -313,7 +313,7 @@
           "expr": "nginx_ingress_controller_nginx_process_connections{state=\"waiting\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{instance}} waiting",
+          "legendFormat": "Waiting",
           "range": true,
           "refId": "C"
         },
@@ -326,12 +326,12 @@
           "expr": "nginx_ingress_controller_nginx_process_connections{state=\"writing\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{instance}} writing",
+          "legendFormat": "Writing",
           "range": true,
           "refId": "D"
         }
       ],
-      "title": "Active Connections",
+      "title": "Connections",
       "type": "timeseries"
     },
     {
@@ -500,7 +500,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -524,7 +525,7 @@
           "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": false
         },
         "tooltip": {
           "maxHeight": 600,
@@ -637,6 +638,6 @@
   "timezone": "",
   "title": "NGINX exporter",
   "uid": "MsjffzSZz",
-  "version": 2,
+  "version": 1,
   "weekStart": ""
 }

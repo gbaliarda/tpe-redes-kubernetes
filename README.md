@@ -406,13 +406,23 @@ To load the example dashboard from `dashboard.json`, follow these steps:
 1. Using the search bar, go to 'Data Sources'.
 2. Click on 'Add data source'.
 3. Select Prometheus.
-4. Enter the configuration details. The only mandatory one is the prometheus server URL, which should be `http://prometheus-server.ingress-nginx.svc.cluster.local:9090`
+4. Enter the configuration details. The only mandatory one is the prometheus server URL, which should be `http://prometheus-server.ingress-nginx.svc.cluster.local:9090`.
 
-5. Click on 'Save and Test' at the end of the page.
-6. Go to Dashboards -> New -> Import -> Upload dashboard JSON file.
+<img loading="lazy" src="images/prometheus_url.png" alt="Prometheus url" />
+
+5. Click on 'Save and Test' at the end of the page. Then prometheus' availability will be queried, which should output a popup message as shown.
+
+<img loading="lazy" src="images/save_and_test.png" alt="Save and test prometheus API" />
+
+6. On the side menu, click on Dashboards. Then, New -> Import -> Upload dashboard JSON file.
 7. Load the `dashboard.json` file located on the root of the project.
-8. Select a Prometheus data source (you should see the default prometheus data source created on step 4).
-9. Click "Import".
+8. Select a Prometheus data source (you should see the default prometheus data source created on step 4). After these steps, the import screen should be as follows.
+
+<img loading="lazy" src="images/import_dashboard.png" alt="Final import screen" />
+
+9. Click "Import". Then you will be prompted to the home page and shown the imported dashboard.
+
+<img loading="lazy" src="images/dashboard_screen.png" alt="Home page with dashboard" />
 
 ## Traffic Monitoring
 
