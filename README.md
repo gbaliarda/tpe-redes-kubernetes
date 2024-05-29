@@ -20,95 +20,99 @@
 - `kubectl`
 - `kind`
 
-## Install Docker
+## Install Docker and Docker Compose
 
-Obtaining Docker Certificates and Keys for Ubuntu
+Docker is a platform that enables developers to create, deploy, and run applications inside lightweight, portable containers, ensuring consistency across different environments.
 
-```bash
-# Add Docker's official GPG key:
-sudo apt-get update
-sudo apt-get install ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
+Below are the instructions to [install Docker on Ubuntu](https://docs.docker.com/engine/install/ubuntu/). For other operating systems, refer to the [official documentation](https://docs.docker.com/engine/install/).
 
-# Add the repository to Apt sources:
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
-```
+Before you install Docker Engine for the first time on a new host machine, you need to set up the Docker repository. Afterward, you can install and update Docker from the repository.
 
-Install the latest version:
+1. Set up Docker's apt repository.
 
-```bash
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-```
+    ```bash
+    # Add Docker's official GPG key:
+    sudo apt-get update
+    sudo apt-get install ca-certificates curl
+    sudo install -m 0755 -d /etc/apt/keyrings
+    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-Verify installation:
+    # Add the repository to Apt sources:
+    echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt-get update
+    ```
 
-```bash
-sudo docker run hello-world
-```
+2. Install the latest version of Docker and Docker Compose.
 
-To avoid using Docker as root:
+    ```bash
+    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    ```
 
-Create docker group:
+3. Verify installation:
 
-```bash
-sudo groupadd docker
-```
+    ```bash
+    sudo docker run hello-world
+    ```
 
-Add user to docker group:
+4. (Optional) To avoid having to use `sudo` with Docker commands, create a Unix group called `docker` and add your user to it.
 
-```bash
-sudo usermod -aG docker $USER
-```
+    ```bash
+    sudo groupadd docker
+    sudo usermod -aG docker $USER
+    newgrp docker
+    ```
 
-Log out and back in, or run:
+    Verify that you can run Docker commands without `sudo`.
 
-```bash
-newgrp docker
-```
+    ```bash
+    docker run hello-world
+    ```
 
 ## Install kubectl
 
-Using curl:
+Kubectl is a command-line tool used to interact with Kubernetes clusters, enabling users to deploy applications, inspect and manage cluster resources, and view logs. It acts as the primary interface for communicating with the Kubernetes API server, allowing for efficient cluster management and automation.
 
-```bash
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-```
+Below are the instructions to [install `kubectl` on Linux (x86_64)](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/#install-kubectl-on-linux). For other operating systems, refer to the [official documentation](https://kubernetes.io/docs/tasks/tools/#kubectl).
 
-Install kubectl:
+1. Download the latest release:
 
-```bash
-sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-```
+    ```bash
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    ```
+
+2. Install kubectl:
+
+    ```bash
+    sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    ```
+
+3. Test to ensure the version you installed is up-to-date:
+
+    ```bash
+    kubectl version --client
+    ```
 
 ## Install kind
 
-Using curl:
+Kind (Kubernetes IN Docker) is a tool for running local Kubernetes clusters using Docker containers, primarily designed for testing Kubernetes itself. It allows developers to create and manage multi-node clusters on their local machines, facilitating development and experimentation without the need for a full-scale cloud environment.
+
+Below are the instructions to [install `kind` on Linux (x86_64)](https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries:~:text=On-,Linux,-%3A). For other operating systems, refer to the [official documentation](https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries).
 
 ```bash
 [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.22.0/kind-linux-amd64
-```
-
-Change permissions:
-
-```bash
 chmod +x ./kind
-```
-
-Move kind to `/usr/local/bin`:
-
-```bash
 sudo mv ./kind /usr/local/bin/kind
 ```
 
 # Installation
 
 ## Setup database
+
+We'll set up a PostgreSQL database using Docker. The database will be accessible on port 5432, outside the k8s cluster that we'll create later.
 
 1. Start Docker.
 2. Run the docker compose file within the `database` folder.
@@ -118,9 +122,15 @@ sudo mv ./kind /usr/local/bin/kind
     docker compose up
     ```
 
-## Create Kubernetes API Cluster
+By default, a [`users` table will be created](database/tables.sql).
 
-### 1. Create `kind` cluster
+## Setup Kubernetes Cluster
+
+All the commands in the following section should be run from the root of the project.
+
+### 1. Create the cluster
+
+We'll create a Kubernetes cluster called `redes-cluster` with one control plane and two worker nodes. The configuration for the cluster is defined in the [`cluster-config.yaml`](kind/cluster-config.yaml) file.
 
 ```bash
 kind create cluster --config ./kind/cluster-config.yaml --name redes-cluster
@@ -132,7 +142,7 @@ You can check your running clusters with:
 kind get clusters
 ```
 
-You can also check the nodes of the cluster with:
+To check the nodes in the cluster, run:
 
 ```bash
 kubectl get nodes
@@ -142,54 +152,62 @@ You should see three nodes running: one control plane and two workers.
 
 ### 2. Build API Docker images
 
-First, make a copy of the `.env.example` file and rename it to `.env`. This file contains the environment variables needed to connect to the database.
+We'll build two Docker images for different versions of the API that will be deployed in the cluster. The API is a simple Express application that connects to the PostgreSQL database to store and retrieve user information.
 
-```bash
-cp api/v1/.env.example api/v1/.env
-cp api/v2/.env.example api/v2/.env
-```
+1. Make a copy of the `.env.example` file on each API and rename it to `.env`. This file contains the environment variables needed to connect to the database.
 
-Adjust the values as needed, but the default values should work with the provided database configuration.
+    ```bash
+    cp api/v1/.env.example api/v1/.env
+    cp api/v2/.env.example api/v2/.env
+    ```
 
-To build the docker images for both versions of the API, run the following commands from the root of the project:
+    Adjust the values as needed, but the default values should work with the provided database configuration.
 
-```bash
-docker build -t apiexpress:v1 api/v1
-docker build -t apiexpress:v2 api/v2
-```
+2. Build the docker images for both versions of the API:
 
-### 3. Load API Docker images into the cluster
+    ```bash
+    docker build -t apiexpress:v1 api/v1
+    docker build -t apiexpress:v2 api/v2
+    ```
+
+### 3. Load API images into the cluster
+
+We'll load the Docker images into the cluster so that they can be used by the Kubernetes deployment.
 
 ```bash
 kind load docker-image apiexpress:v1 --name redes-cluster
 kind load docker-image apiexpress:v2 --name redes-cluster
 ```
 
-### 5. Add the database endpoint and service configuration to the cluster
+### 5. Add the database Endpoint and Service configuration to the cluster
 
-From the root of the project, run the following command:
+With the following command, we'll create a headless service with a specific endpoint that points to the external database.
 
 ```bash
 kubectl apply -f k8s/database/
 ```
 
-### 6. Add the API deployment and service configuration to the cluster
+Any pods within the Kubernetes cluster that need to connect to the database can do so by using the service name `database`.
 
-From the root of the project, run the following command:
+### 6. Add the API Deployment and Service configuration to the cluster
+
+We'll create a Deployment for both versions of the API and expose them as Services.
 
 ```bash
 kubectl apply -f k8s/api/ --recursive
 ```
 
-### 7. Create the Nginx controller
+Each Deployment will create three replicas of the API pod, and the Service will expose the API on port 8080.
 
-Install the Nginx controller using the following command:
+### 7. Install Nginx Ingress controller
+
+Install the Nginx Ingress controller using the following command:
 
 ```bash
 kubectl apply -f ./nginx/controller-nginx.yaml
 ```
 
-This will create the `ingress-nginx` namespace. You can check the pods running in this namespace with:
+This will also create the `ingress-nginx` namespace. You can check the pods running in this namespace with:
 
 ```bash
 kubectl get pods -n ingress-nginx
@@ -197,13 +215,13 @@ kubectl get pods -n ingress-nginx
 
 ### 8. Apply the Ingress configuration to the nginx controller
 
-The following command will wait for the Nginx controller pod to be ready and then apply the Ingress configuration to it:
+The command below will wait for the Nginx Ingress controller pod to be ready, and then apply the Ingress configuration to it:
 
 ```bash
 kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=180s && kubectl apply -f ./nginx/ingress-nginx.yaml
 ```
 
-### 9. Port forward the Nginx controller to your localhost
+### 9. Port forward the Nginx controller Service
 
 The following command will allow you to access the Nginx controller (and hence the API) from your localhost:
 
@@ -211,17 +229,23 @@ The following command will allow you to access the Nginx controller (and hence t
 kubectl port-forward --namespace=ingress-nginx service/ingress-nginx-controller 8080:80
 ```
 
-You can check the running pods with:
+Before moving on, check that all pods are `Running` with the following command:
 
 ```bash 
 kubectl get pods
 ```
 
-All pods should have status `Running`.
+## Cleanup
 
-### 10. Test the API
+Once you're done testing, you can delete the cluster with the following command:
 
-To test that both version of the API are running, you can run the following commands:
+```bash
+kind delete cluster --name redes-cluster
+```
+
+# Test the APIs
+
+To test that both versions of the API are running, you can run the following commands:
 
 ```bash 
 curl http://localhost:8080/v1
@@ -232,53 +256,47 @@ The difference between the two versions is that:
 - V1 allows you to create and read users.
 - V2 adds the ability to update and delete users.
 
-Create users using both versions and check that they are stored in the database.
+We'll now explore the different functionalities of the API and the differences between the two versions.
 
-```bash
-# V1
-curl -X POST -H "Content-Type: application/json" -d '{"username":"user1", "password":"pass1"}' http://localhost:8080/v1/user
+1. Create test users.
 
-# V2
-curl -X POST -H "Content-Type: application/json" -d '{"username":"user2", "password":"pass2"}' http://localhost:8080/v2/user
-```
+    ```bash
+    # V1
+    curl -X POST -H "Content-Type: application/json" -d '{"username":"user1", "password":"pass1"}' http://localhost:8080/v1/user
 
-Read the users using both versions:
+    # V2
+    curl -X POST -H "Content-Type: application/json" -d '{"username":"user2", "password":"pass2"}' http://localhost:8080/v2/user
+    ```
 
-```bash
-# V1
-curl http://localhost:8080/v1/user/2
+2. Get the created users:
 
-# V2
-curl http://localhost:8080/v2/user/1
-```
+    ```bash
+    # V1
+    curl http://localhost:8080/v1/user/2
 
-Update a user using V2:
+    # V2
+    curl http://localhost:8080/v2/user/1
+    ```
 
-```bash
-# V1, this should return an error
-curl -X PUT -H "Content-Type: application/json" -d '{"username":"newuser11", "password":"newpass11"}' http://localhost:8080/v1/user/1
+3. Update a user using V2:
 
-# V2
-curl -X PUT -H "Content-Type: application/json" -d '{"username":"newuser1", "password":"newpass1"}' http://localhost:8080/v2/user/1
-```
+    ```bash
+    # V1, this should return an error
+    curl -X PUT -H "Content-Type: application/json" -d '{"username":"newuser11", "password":"newpass11"}' http://localhost:8080/v1/user/1
 
-Delete a user using V2:
+    # V2
+    curl -X PUT -H "Content-Type: application/json" -d '{"username":"newuser1", "password":"newpass1"}' http://localhost:8080/v2/user/1
+    ```
 
-```bash
-# V1, this should return an error
-curl -X DELETE http://localhost:8080/v1/user/2
+4. Delete a user using V2:
 
-# V2
-curl -X DELETE http://localhost:8080/v2/user/1
-```
+    ```bash
+    # V1, this should return an error
+    curl -X DELETE http://localhost:8080/v1/user/2
 
-### 11. Cleanup
-
-To delete your cluster, you can run:
-
-```bash
-kind delete cluster --name redes-cluster
-```
+    # V2
+    curl -X DELETE http://localhost:8080/v2/user/1
+    ```
 
 # Cluster Monitoring
 
