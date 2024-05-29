@@ -21,3 +21,24 @@ spec:
           imagePullPolicy: Never
           ports:
             - containerPort: 8080
+          env:
+            - name: DB_HOST
+              valueFrom:
+                  secretKeyRef:
+                    name: database-secret
+                    key: host
+            - name: DB_USER
+              valueFrom:
+                  secretKeyRef:
+                    name: database-secret
+                    key: pass
+            - name: DB_PASS
+              valueFrom:
+                  secretKeyRef:
+                    name: database-secret
+                    key: pass
+            - name: DB_NAME
+              valueFrom:
+                  secretKeyRef:
+                    name: database-secret
+                    key: name

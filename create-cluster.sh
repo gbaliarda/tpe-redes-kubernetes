@@ -10,6 +10,7 @@ kind load docker-image apiexpress:v2 --name redes-cluster
 
 cd ../..
 kubectl apply -f ./k8s/database/
+kubectl apply -f ./k8s/secret.yaml
 kubectl apply -f ./k8s/api/v1
 kubectl apply -f ./k8s/api/v2
 kubectl apply -f ./nginx/controller-nginx.yaml
