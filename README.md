@@ -1,11 +1,11 @@
-# Authors
+## Authors
 
 - Baliarda Gonzalo
 - Birsa Nicolás
 - Perez Ezequiel Agustín
 - Ye Li Valentín
 
-# Assignment
+## Assignment
 
 - Create a Kubernetes cluster with one Master and at least two slaves, exposing an API on a generic port (different from 80).
 - Implement a local database on a server (outside the cluster) and expose a service that redirects cluster traffic to the server.
@@ -13,14 +13,48 @@
 - Show two different versions of the API coexisting.
 - Integrate Istio and Kiali services into the cluster.
 
-# Pre-requisites
+## Table Of Contents
+
+- [Authors](#authors)
+- [Assignment](#assignment)
+- [Table Of Contents](#table-of-contents)
+- [Pre-requisites](#pre-requisites)
+  - [Install Docker and Docker Compose](#install-docker-and-docker-compose)
+  - [Install kubectl](#install-kubectl)
+  - [Install kind](#install-kind)
+- [Installation](#installation)
+  - [Setup database](#setup-database)
+  - [Setup Kubernetes Cluster](#setup-kubernetes-cluster)
+    - [1. Create the cluster](#1-create-the-cluster)
+    - [2. Build API Docker images](#2-build-api-docker-images)
+    - [3. Load API images into the cluster](#3-load-api-images-into-the-cluster)
+    - [4. Add the database Endpoint and Service configuration to the cluster](#4-add-the-database-endpoint-and-service-configuration-to-the-cluster)
+    - [5. Add the API Deployment and Service configuration to the cluster](#5-add-the-api-deployment-and-service-configuration-to-the-cluster)
+    - [6. Install Nginx Ingress controller](#6-install-nginx-ingress-controller)
+    - [7. Apply the Ingress configuration to the nginx controller](#7-apply-the-ingress-configuration-to-the-nginx-controller)
+    - [8. Port forward the Nginx controller Service](#8-port-forward-the-nginx-controller-service)
+  - [Cleanup](#cleanup)
+- [Test the APIs](#test-the-apis)
+- [Cluster Monitoring](#cluster-monitoring)
+  - [Istio](#istio)
+    - [Download](#download)
+    - [Install in the cluster](#install-in-the-cluster)
+  - [Prometheus \& Grafana](#prometheus--grafana)
+    - [Install](#install)
+    - [Grafana Dashboard](#grafana-dashboard)
+  - [Kiali](#kiali)
+    - [Install](#install-1)
+    - [Run](#run)
+  - [Generating Traffic](#generating-traffic)
+
+## Pre-requisites
 
 - `docker`
 - `docker compose`
 - `kubectl`
 - `kind`
 
-## Install Docker and Docker Compose
+### Install Docker and Docker Compose
 
 Docker is a platform that enables developers to create, deploy, and run applications inside lightweight, portable containers, ensuring consistency across different environments.
 
@@ -72,7 +106,7 @@ Before you install Docker Engine for the first time on a new host machine, you n
     docker run hello-world
     ```
 
-## Install kubectl
+### Install kubectl
 
 Kubectl is a command-line tool used to interact with Kubernetes clusters, enabling users to deploy applications, inspect and manage cluster resources, and view logs. It acts as the primary interface for communicating with the Kubernetes API server, allowing for efficient cluster management and automation.
 
@@ -96,7 +130,7 @@ Below are the instructions to [install `kubectl` on Linux (x86_64)](https://kube
     kubectl version --client
     ```
 
-## Install kind
+### Install kind
 
 Kind (Kubernetes IN Docker) is a tool for running local Kubernetes clusters using Docker containers, primarily designed for testing Kubernetes itself. It allows developers to create and manage multi-node clusters on their local machines, facilitating development and experimentation without the need for a full-scale cloud environment.
 
@@ -108,9 +142,9 @@ chmod +x ./kind
 sudo mv ./kind /usr/local/bin/kind
 ```
 
-# Installation
+## Installation
 
-## Setup database
+### Setup database
 
 We'll set up a PostgreSQL database using Docker. The database will be accessible on port 5432, outside the k8s cluster that we'll create later.
 
@@ -124,11 +158,11 @@ We'll set up a PostgreSQL database using Docker. The database will be accessible
 
 By default, a [`users` table will be created](database/tables.sql).
 
-## Setup Kubernetes Cluster
+### Setup Kubernetes Cluster
 
 All the commands in the following section should be run from the root of the project.
 
-### 1. Create the cluster
+#### 1. Create the cluster
 
 We'll create a Kubernetes cluster called `redes-cluster` with one control plane and two worker nodes. The configuration for the cluster is defined in the [`cluster-config.yaml`](kind/cluster-config.yaml) file.
 
@@ -150,7 +184,7 @@ kubectl get nodes
 
 You should see three nodes running: one control plane and two workers.
 
-### 2. Build API Docker images
+#### 2. Build API Docker images
 
 We'll build two Docker images for different versions of the API that will be deployed in the cluster. The API is a simple Express application that connects to the PostgreSQL database to store and retrieve user information.
 
@@ -170,7 +204,7 @@ We'll build two Docker images for different versions of the API that will be dep
     docker build -t apiexpress:v2 api/v2
     ```
 
-### 3. Load API images into the cluster
+#### 3. Load API images into the cluster
 
 We'll load the Docker images into the cluster so that they can be used by the Kubernetes deployment.
 
@@ -179,7 +213,7 @@ kind load docker-image apiexpress:v1 --name redes-cluster
 kind load docker-image apiexpress:v2 --name redes-cluster
 ```
 
-### 5. Add the database Endpoint and Service configuration to the cluster
+#### 4. Add the database Endpoint and Service configuration to the cluster
 
 With the following command, we'll create a headless service with a specific endpoint that points to the external database.
 
@@ -189,7 +223,7 @@ kubectl apply -f k8s/database/
 
 Any pods within the Kubernetes cluster that need to connect to the database can do so by using the service name `database`.
 
-### 6. Add the API Deployment and Service configuration to the cluster
+#### 5. Add the API Deployment and Service configuration to the cluster
 
 We'll create a Deployment for both versions of the API and expose them as Services.
 
@@ -199,7 +233,7 @@ kubectl apply -f k8s/api/ --recursive
 
 Each Deployment will create three replicas of the API pod, and the Service will expose the API on port 8080.
 
-### 7. Install Nginx Ingress controller
+#### 6. Install Nginx Ingress controller
 
 Install the Nginx Ingress controller using the following command:
 
@@ -213,7 +247,7 @@ This will also create the `ingress-nginx` namespace. You can check the pods runn
 kubectl get pods -n ingress-nginx
 ```
 
-### 8. Apply the Ingress configuration to the nginx controller
+#### 7. Apply the Ingress configuration to the nginx controller
 
 The command below will wait for the Nginx Ingress controller pod to be ready, and then apply the Ingress configuration to it:
 
@@ -221,7 +255,7 @@ The command below will wait for the Nginx Ingress controller pod to be ready, an
 kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=180s && kubectl apply -f ./nginx/ingress-nginx.yaml
 ```
 
-### 9. Port forward the Nginx controller Service
+#### 8. Port forward the Nginx controller Service
 
 The following command will allow you to access the Nginx controller (and hence the API) from your localhost:
 
@@ -235,7 +269,7 @@ Before moving on, check that all pods are `Running` with the following command:
 kubectl get pods
 ```
 
-## Cleanup
+### Cleanup
 
 Once you're done testing, you can delete the cluster with the following command:
 
@@ -243,7 +277,7 @@ Once you're done testing, you can delete the cluster with the following command:
 kind delete cluster --name redes-cluster
 ```
 
-# Test the APIs
+## Test the APIs
 
 To test that both versions of the API are running, you can run the following commands:
 
@@ -298,11 +332,11 @@ We'll now explore the different functionalities of the API and the differences b
     curl -X DELETE http://localhost:8080/v2/user/1
     ```
 
-# Cluster Monitoring
+## Cluster Monitoring
 
-## Istio
+### Istio
 
-### Download
+#### Download
 
 We'll install the latest `istioctl` version (1.22). To install a previous version, refer to the [Istio install page](https://istio.io/latest/docs/setup/getting-started/) to check the available options.
 
@@ -324,7 +358,7 @@ To verify that Istio can be installed in the Kubernetes cluster, run:
 istioctl x precheck
 ```
 
-### Install Istio in the cluster
+#### Install in the cluster
 
 To install Istio in the cluster, first delete the previously applied manifests. They will be reinstated after the installation is done.
 
@@ -362,15 +396,15 @@ kubectl apply -f ./nginx/controller-nginx.yaml
 kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=180s && kubectl apply -f ./nginx/ingress-nginx.yaml
 ```
 
-## Prometheus & Grafana
+### Prometheus & Grafana
 
 Prometheus is an open-source monitoring and alerting toolkit designed for reliability and scalability, used to collect metrics from monitored targets and then store and query those metrics. Grafana is a visualization tool that integrates with various data sources, including Prometheus, allowing users to create customizable dashboards and visualize metrics in real-time.
 
 We'll use Prometheus to collect metrics from Nginx, and Grafana to visualize the collected data.
 
-### Install
+#### Install
 
-Before installing Prometheus and Grafana, make sure to have the Nginx controller and service running. If not, refer to steps 7 and 8 of the "Setup Kubernetes Cluster" section.
+Before installing Prometheus and Grafana, make sure to have the Nginx controller and service running. If not, refer to steps 6 and 7 of the "Setup Kubernetes Cluster" section.
 
 To install Prometheus and Grafana in the cluster, run:
 
@@ -385,7 +419,7 @@ You can check the running pods with:
 kubectl get pods -n ingress-nginx
 ```
 
-### Grafana Dashboard
+#### Grafana Dashboard
 
 To access the Grafana dashboard, you must forward a port on your local machine (e.g. 3000) to port 3000 of the Grafana service running in the `ingress-nginx` namespace within your Kubernetes cluster, enabling direct access to the Grafana dashboard from your local browser.
 
@@ -418,11 +452,11 @@ To load the example dashboard from [`dashboard.json`](dashboard.json), follow th
 
     <img loading="lazy" src="images/dashboard_screen.png" alt="Home page with dashboard" />
 
-## Kiali
+### Kiali
 
 Kiali is an observavility console for Istio. It lets you understand the structure and health of the service mesh by monitoring traffic flow. This way, it can infer the topology of the cluster and report errors.
 
-### Install
+#### Install
 
 To install Kiali, simply apply its manifest:
 
@@ -436,7 +470,7 @@ Prometheus must also be installed, as Kiali uses its metrics to operate. In case
 kubectl apply --kustomize k8s/prometheus
 ```
 
-### Run
+#### Run
 
 Wait for the Kiali pod to be ready, and then init the dashboard using `istioctl` to check the traffic on the cluster.
 
@@ -450,7 +484,7 @@ This should open up the Kiali UI at `http://localhost:20001`. There you can moni
 
 Note that there must be traffic on the cluster, otherwise the previous graph will only contain idle nodes. Said traffic can be generated using the command shown on the following section.
 
-## Generating Traffic
+### Generating Traffic
 
 Traffic through both APIs running on the cluster can be generated using:
 
