@@ -302,19 +302,10 @@ We'll now explore the different functionalities of the API and the differences b
 
 ## Istio
 
-To install Istio, first delete the previously applied manifests. They will be reinstated after the installation is done:
+### Download
 
-```bash
-kubectl delete -f k8s/database
-kubectl delete -f k8s/api --recursive
-kubectl delete -f nginx
-```
+We'll install the latest `istioctl` version (1.22). To install a previous version, refer to the [Istio install page](https://istio.io/latest/docs/setup/getting-started/) to check the available options.
 
-We'll install the latest Istio version (1.22). To install a previous version, refer to the [Istio install page](https://istio.io/latest/docs/setup/getting-started/) to check the available options.
-
-### Download Istio
-
-Firstly, download Istio and add it to the path variable.
 - Linux or macOS:
     ```sh
     curl -L https://istio.io/downloadIstio | sh -
@@ -327,7 +318,7 @@ Firstly, download Istio and add it to the path variable.
     1. Go to the [Istio releases page]() and download the latest version. We ran our tests on [v1.22.0](https://github.com/istio/istio/releases/download/1.22.0/istio-1.22.0-win.zip).
     2. Edit the system environment variables and add the path to the `bin` folder of the extracted zip file.
 
-To verify that Istio can be installed in the Kubernetes cluster run:
+To verify that Istio can be installed in the Kubernetes cluster, run:
 
 ```sh
 istioctl x precheck
@@ -335,13 +326,21 @@ istioctl x precheck
 
 ### Install Istio in the cluster
 
-To install Istio, run the following command. We´ll use the _default_ configuration profile, but [others can be chosen](https://istio.io/latest/docs/setup/additional-setup/config-profiles/) based on the given case.
+To install Istio in the cluster, first delete the previously applied manifests. They will be reinstated after the installation is done.
+
+```bash
+kubectl delete -f k8s/database
+kubectl delete -f k8s/api --recursive
+kubectl delete -f nginx
+```
+
+We can now proceed with the installation by running the command below. We´ll use the _default_ configuration profile, but [others can be chosen](https://istio.io/latest/docs/setup/additional-setup/config-profiles/) based on the given case.
 
 ```sh
 istioctl install --set profile=default -y
 ```
 
-Then, we label the namespaces to let istio inject its sidecars for monitoring:
+Then, we'll label the namespaces to let istio inject its "sidecars" for monitoring:
 
 ```sh
 kubectl label ns default istio-injection=enabled
@@ -355,7 +354,7 @@ kubectl apply -f k8s/api --recursive
 kubectl apply -f k8s/database
 ```
 
-The same goes for all the nginx setup commands:
+The same goes for the Nginx Ingress controller:
 
 ```sh
 kubectl apply -f ./nginx/controller-nginx.yaml
@@ -365,13 +364,15 @@ kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.
 
 ## Prometheus & Grafana
 
-Prometheus is a tool that collects metrics from NGINX, and Grafana can be used to make dashboards to visualize said data.
+Prometheus is an open-source monitoring and alerting toolkit designed for reliability and scalability, used to collect metrics from monitored targets and then store and query those metrics. Grafana is a visualization tool that integrates with various data sources, including Prometheus, allowing users to create customizable dashboards and visualize metrics in real-time.
+
+We'll use Prometheus to collect metrics from Nginx, and Grafana to visualize the collected data.
 
 ### Install
 
-Before installing Prometheus and Grafana, make sure to have the NGINX controller and service running. If not, refer to steps 7 and 8 of the first section.
+Before installing Prometheus and Grafana, make sure to have the Nginx controller and service running. If not, refer to steps 7 and 8 of the "Setup Kubernetes Cluster" section.
 
-To install Prometheus and Grafana run:
+To install Prometheus and Grafana in the cluster, run:
 
 ```sh
 kubectl apply --kustomize k8s/prometheus
@@ -384,58 +385,52 @@ You can check the running pods with:
 kubectl get pods -n ingress-nginx
 ```
 
-Then, to get the services' port run the following command:
-
-```bash
-kubectl get svc -n ingress-nginx
-```
-
 ### Grafana Dashboard
 
-To access the Grafana dashboard, you must port-forward the service to your localhost:
+To access the Grafana dashboard, you must forward a port on your local machine (e.g. 3000) to port 3000 of the Grafana service running in the `ingress-nginx` namespace within your Kubernetes cluster, enabling direct access to the Grafana dashboard from your local browser.
 
 ```sh
 kubectl port-forward -n ingress-nginx service/grafana 3000:3000
 ```
 
-The Grafana dashboard will be accessible on `localhost:3000`, where the default user and password are both `admin`.
+The Grafana dashboard will be accessible on `localhost:3000`, where the default username and password will both be `admin`.
 
-To load the example dashboard from `dashboard.json`, follow these steps:
+To load the example dashboard from [`dashboard.json`](dashboard.json), follow these steps:
 
-1. Using the search bar, go to 'Data Sources'.
-2. Click on 'Add data source'.
+1. Using the search bar, go to "Data Sources".
+2. Click on "Add data source".
 3. Select Prometheus.
 4. Enter the configuration details. The only mandatory one is the prometheus server URL, which should be `http://prometheus-server.ingress-nginx.svc.cluster.local:9090`.
 
     <img loading="lazy" src="images/prometheus_url.png" alt="Prometheus url" />
 
-5. Click on 'Save and Test' at the end of the page. Then prometheus' availability will be queried, which should output a popup message as shown.
+5. Click on "Save and Test" at the end of the page. Then prometheus' availability will be queried, which should output a popup message as shown.
 
     <img loading="lazy" src="images/save_and_test.png" alt="Save and test prometheus API" />
 
-6. On the side menu, click on Dashboards. Then, New -> Import -> Upload dashboard JSON file.
+6. On the side menu, click on Dashboards. Then, click on New -> Import -> Upload dashboard JSON file.
 7. Load the `dashboard.json` file located on the root of the project.
 8. Select a Prometheus data source (you should see the default prometheus data source created on step 4). After these steps, the import screen should be as follows.
 
     <img loading="lazy" src="images/import_dashboard.png" alt="Final import screen" />
 
-9. Click "Import". Then you will be prompted to the home page and shown the imported dashboard.
+9. Click "Import". After that, you should be redirected to the home page and shown the imported dashboard.
 
     <img loading="lazy" src="images/dashboard_screen.png" alt="Home page with dashboard" />
 
 ## Kiali
 
-Kiali is an observavility console for Istio, letting us understand the structure and health of the service mesh by monitoring traffic flow to infer the topology and report errors.
+Kiali is an observavility console for Istio. It lets you understand the structure and health of the service mesh by monitoring traffic flow. This way, it can infer the topology of the cluster and report errors.
 
 ### Install
 
-To install Kiali, add the manifest with the same procedure used for the api and database.
+To install Kiali, simply apply its manifest:
 
 ```sh
 kubectl apply -f k8s/kiali
 ```
 
-Prometheus must also be installed, as Kiali uses its metrics to operate. In case the 'Prometheus & Grafana' section install step was skipped, install Prometheus using:
+Prometheus must also be installed, as Kiali uses its metrics to operate. In case the "Prometheus & Grafana" installation section was skipped, install Prometheus using:
 
 ```sh
 kubectl apply --kustomize k8s/prometheus
@@ -443,22 +438,21 @@ kubectl apply --kustomize k8s/prometheus
 
 ### Run
 
-Wait for the pod to be ready, and then init the kiali dashboard with istio to check the traffic on the cluster.
+Wait for the Kiali pod to be ready, and then init the dashboard using `istioctl` to check the traffic on the cluster.
 
 ```sh
 istioctl dashboard kiali
 ```
 
-Then, you will be prompted to Kiali UI on the url `http://localhost:20001`. There, you can monitor multiple things such as the _Traffic Graph_, which should be as follows:
+This should open up the Kiali UI at `http://localhost:20001`. There you can monitor multiple things, such as the _Traffic Graph_, which should look as follows:
 
 <img loading="lazy" src="images/traffic_graph.png" alt="Kiali traffic graph" />
 
-It should be noted that there must be traffic present on the cluster, otherwise the previous graph will only contain idle nodes. Said traffic can be generated using the command shown on the following section.
-
+Note that there must be traffic on the cluster, otherwise the previous graph will only contain idle nodes. Said traffic can be generated using the command shown on the following section.
 
 ## Generating Traffic
 
-Traffic through both apis running on the cluster can be generated using:
+Traffic through both APIs running on the cluster can be generated using:
 
 ```sh
 while sleep 1; do curl "localhost:8080/v1" && curl "localhost:8080/v2"; done
