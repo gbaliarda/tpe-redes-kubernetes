@@ -19,9 +19,8 @@
 - `docker compose`
 - `kubectl`
 - `kind`
-- `istio`
 
-### Install Docker
+## Install Docker
 
 Obtaining Docker Certificates and Keys for Ubuntu
 
@@ -73,7 +72,7 @@ Log out and back in, or run:
 newgrp docker
 ```
 
-### Install kubectl
+## Install kubectl
 
 Using curl:
 
@@ -87,7 +86,7 @@ Install kubectl:
 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 ```
 
-### Install kind
+## Install kind
 
 Using curl:
 
@@ -114,10 +113,10 @@ sudo mv ./kind /usr/local/bin/kind
 1. Start Docker.
 2. Run the docker compose file within the `database` folder.
 
-```bash
-cd database
-docker compose up
-```
+    ```bash
+    cd database
+    docker compose up
+    ```
 
 ## Create Kubernetes API Cluster
 
@@ -390,21 +389,21 @@ To load the example dashboard from `dashboard.json`, follow these steps:
 3. Select Prometheus.
 4. Enter the configuration details. The only mandatory one is the prometheus server URL, which should be `http://prometheus-server.ingress-nginx.svc.cluster.local:9090`.
 
-<img loading="lazy" src="images/prometheus_url.png" alt="Prometheus url" />
+    <img loading="lazy" src="images/prometheus_url.png" alt="Prometheus url" />
 
 5. Click on 'Save and Test' at the end of the page. Then prometheus' availability will be queried, which should output a popup message as shown.
 
-<img loading="lazy" src="images/save_and_test.png" alt="Save and test prometheus API" />
+    <img loading="lazy" src="images/save_and_test.png" alt="Save and test prometheus API" />
 
 6. On the side menu, click on Dashboards. Then, New -> Import -> Upload dashboard JSON file.
 7. Load the `dashboard.json` file located on the root of the project.
 8. Select a Prometheus data source (you should see the default prometheus data source created on step 4). After these steps, the import screen should be as follows.
 
-<img loading="lazy" src="images/import_dashboard.png" alt="Final import screen" />
+    <img loading="lazy" src="images/import_dashboard.png" alt="Final import screen" />
 
 9. Click "Import". Then you will be prompted to the home page and shown the imported dashboard.
 
-<img loading="lazy" src="images/dashboard_screen.png" alt="Home page with dashboard" />
+    <img loading="lazy" src="images/dashboard_screen.png" alt="Home page with dashboard" />
 
 ## Kiali
 
