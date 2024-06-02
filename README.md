@@ -207,13 +207,19 @@ kind load docker-image apiexpress:v2 --name redes-cluster
 
 #### 4. Add the database Endpoint and Service configuration to the cluster
 
-With the following command, we'll create a headless service with a specific endpoint that points to the external database.
+With the following command, we'll create a headless Service with a specific Endpoint that points to the external database.
 
 ```bash
 kubectl apply -f k8s/database/
 ```
 
-Any pods within the Kubernetes cluster that need to connect to the database can do so by using the service name `database`.
+Since we're running the database in a Docker container, we'll point the Endpoint to the IP address associated with the Docker bridge network interface `docker0`. This IP address can be found by running the following command:
+
+```bash
+docker network inspect bridge | grep Gateway
+```
+
+Any pods within the Kubernetes cluster that need to connect to the database can do so by using the Service name `database`.
 
 #### 5. Add the API Deployment and Service configuration to the cluster
 
