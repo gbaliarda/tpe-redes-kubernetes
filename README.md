@@ -232,8 +232,7 @@ kubectl apply -f k8s/secret.yaml
 Then, we'll create a Deployment for both versions of the API and expose them as Services.
 
 ```bash
-kubectl apply -f k8s/api/v1
-kubectl apply -f k8s/api/v2
+kubectl apply -f k8s/api --recursive
 ```
 
 Each Deployment will create three replicas of the API pod, and the Service will expose the API on port 8080.
