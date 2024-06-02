@@ -74,25 +74,26 @@ Before you install Docker Engine for the first time on a new host machine, you n
 
     # Add the repository to Apt sources:
     echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    
     sudo apt-get update
     ```
 
-2. Install the latest version of Docker and Docker Compose.
+1. Install the latest version of Docker and Docker Compose.
 
     ```bash
     sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     ```
 
-3. Verify installation:
+2. Verify installation:
 
     ```bash
     sudo docker run hello-world
     ```
 
-4. (Optional) To avoid having to use `sudo` with Docker commands, create a Unix group called `docker` and add your user to it.
+3. (Optional) To avoid having to use `sudo` with Docker commands, create a Unix group called `docker` and add your user to it.
 
     ```bash
     sudo groupadd docker
