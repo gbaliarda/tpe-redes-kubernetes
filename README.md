@@ -348,10 +348,8 @@ We'll install the latest `istioctl` version (1.22). To install a previous versio
 - Linux or macOS:
     ```sh
     curl -L https://istio.io/downloadIstio | sh -
-    cd istio-1.22.0
-    # The command below adds istioctl to the PATH variable, but only for the current session.
-    # To make it permanent, add the bin folder to the PATH variable in the .bashrc or .bash_profile file.
-    export PATH=$PWD/bin:$PATH
+    # Update the istio version in the command below as needed
+    echo 'export PATH=$PWD/istio-1.22.0/bin:$PATH' >> ~/.bashrc && source ~/.bashrc
     ```
 - Windows:
     1. Go to the [Istio releases page]() and download the latest version. We ran our tests on [v1.22.0](https://github.com/istio/istio/releases/download/1.22.0/istio-1.22.0-win.zip).
