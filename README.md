@@ -93,7 +93,7 @@ Before you install Docker Engine for the first time on a new host machine, you n
     sudo docker run hello-world
     ```
 
-3. (Optional) To avoid having to use `sudo` with Docker commands, create a Unix group called `docker` and add your user to it.
+3. To avoid having to use `sudo` with Docker and `kind` commands, create a Unix group called `docker` and add your user to it.
 
     ```bash
     sudo groupadd docker
