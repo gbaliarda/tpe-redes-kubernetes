@@ -4,6 +4,7 @@ metadata:
   name: database
 subsets:
 - addresses:
+  # IP address associated with the Docker bridge network interface `docker0`
   - ip: 172.17.0.1
 ---
 apiVersion: v1

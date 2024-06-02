@@ -74,25 +74,26 @@ Before you install Docker Engine for the first time on a new host machine, you n
 
     # Add the repository to Apt sources:
     echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    
     sudo apt-get update
     ```
 
-2. Install the latest version of Docker and Docker Compose.
+1. Install the latest version of Docker and Docker Compose.
 
     ```bash
     sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     ```
 
-3. Verify installation:
+2. Verify installation:
 
     ```bash
     sudo docker run hello-world
     ```
 
-4. (Optional) To avoid having to use `sudo` with Docker commands, create a Unix group called `docker` and add your user to it.
+3. To avoid having to use `sudo` with Docker and `kind` commands, create a Unix group called `docker` and add your user to it.
 
     ```bash
     sudo groupadd docker
@@ -164,10 +165,10 @@ All the commands in the following section should be run from the root of the pro
 
 #### 1. Create the cluster
 
-We'll create a Kubernetes cluster called `redes-cluster` with one control plane and two worker nodes. The configuration for the cluster is defined in the [`cluster-config.yaml`](kind/cluster-config.yaml) file.
+We'll create a Kubernetes cluster called `redes-cluster` with one control plane and two worker nodes. The configuration for the cluster is defined in the [`cluster-config.yaml`](k8s/cluster-config.yaml) file.
 
 ```bash
-kind create cluster --config ./kind/cluster-config.yaml --name redes-cluster
+kind create cluster --config ./k8s/cluster-config.yaml --name redes-cluster
 ```
 
 You can check your running clusters with:
@@ -186,23 +187,14 @@ You should see three nodes running: one control plane and two workers.
 
 #### 2. Build API Docker images
 
-We'll build two Docker images for different versions of the API that will be deployed in the cluster. The API is a simple Express application that connects to the PostgreSQL database to store and retrieve user information.
+We'll build two Docker images for different versions of the API that will be deployed in the cluster.
 
-1. Make a copy of the `.env.example` file on each API and rename it to `.env`. This file contains the environment variables needed to connect to the database.
+```bash
+docker build -t apiexpress:v1 api/v1
+docker build -t apiexpress:v2 api/v2
+```
 
-    ```bash
-    cp api/v1/.env.example api/v1/.env
-    cp api/v2/.env.example api/v2/.env
-    ```
-
-    Adjust the values as needed, but the default values should work with the provided database configuration.
-
-2. Build the docker images for both versions of the API:
-
-    ```bash
-    docker build -t apiexpress:v1 api/v1
-    docker build -t apiexpress:v2 api/v2
-    ```
+The API is a simple Express application that connects to the PostgreSQL database to store and retrieve user information.
 
 #### 3. Load API images into the cluster
 
@@ -215,13 +207,19 @@ kind load docker-image apiexpress:v2 --name redes-cluster
 
 #### 4. Add the database Endpoint and Service configuration to the cluster
 
-With the following command, we'll create a headless service with a specific endpoint that points to the external database.
+With the following command, we'll create a headless Service with a specific Endpoint that points to the external database.
 
 ```bash
 kubectl apply -f k8s/database/
 ```
 
-Any pods within the Kubernetes cluster that need to connect to the database can do so by using the service name `database`.
+Since we're running the database in a Docker container, we'll point the Endpoint to the IP address associated with the Docker bridge network interface `docker0`. This IP address can be found by running the following command:
+
+```bash
+docker network inspect bridge | grep Gateway
+```
+
+Any pods within the Kubernetes cluster that need to connect to the database can do so by using the Service name `database`.
 
 #### 5. Add the API Deployment and Service configuration to the cluster
 
@@ -234,8 +232,7 @@ kubectl apply -f k8s/secret.yaml
 Then, we'll create a Deployment for both versions of the API and expose them as Services.
 
 ```bash
-kubectl apply -f k8s/api/v1
-kubectl apply -f k8s/api/v2
+kubectl apply -f k8s/api --recursive
 ```
 
 Each Deployment will create three replicas of the API pod, and the Service will expose the API on port 8080.
@@ -350,10 +347,8 @@ We'll install the latest `istioctl` version (1.22). To install a previous versio
 - Linux or macOS:
     ```sh
     curl -L https://istio.io/downloadIstio | sh -
-    cd istio-1.22.0
-    # The command below adds istioctl to the PATH variable, but only for the current session.
-    # To make it permanent, add the bin folder to the PATH variable in the .bashrc or .bash_profile file.
-    export PATH=$PWD/bin:$PATH
+    # Update the istio version in the command below as needed
+    echo 'export PATH=$PWD/istio-1.22.0/bin:$PATH' >> ~/.bashrc && source ~/.bashrc
     ```
 - Windows:
     1. Go to the [Istio releases page]() and download the latest version. We ran our tests on [v1.22.0](https://github.com/istio/istio/releases/download/1.22.0/istio-1.22.0-win.zip).
