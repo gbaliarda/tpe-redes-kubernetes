@@ -187,23 +187,14 @@ You should see three nodes running: one control plane and two workers.
 
 #### 2. Build API Docker images
 
-We'll build two Docker images for different versions of the API that will be deployed in the cluster. The API is a simple Express application that connects to the PostgreSQL database to store and retrieve user information.
+We'll build two Docker images for different versions of the API that will be deployed in the cluster.
 
-1. Make a copy of the `.env.example` file on each API and rename it to `.env`. This file contains the environment variables needed to connect to the database.
+```bash
+docker build -t apiexpress:v1 api/v1
+docker build -t apiexpress:v2 api/v2
+```
 
-    ```bash
-    cp api/v1/.env.example api/v1/.env
-    cp api/v2/.env.example api/v2/.env
-    ```
-
-    Adjust the values as needed, but the default values should work with the provided database configuration.
-
-2. Build the docker images for both versions of the API:
-
-    ```bash
-    docker build -t apiexpress:v1 api/v1
-    docker build -t apiexpress:v2 api/v2
-    ```
+The API is a simple Express application that connects to the PostgreSQL database to store and retrieve user information.
 
 #### 3. Load API images into the cluster
 
