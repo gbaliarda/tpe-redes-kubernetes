@@ -223,17 +223,15 @@ kubectl apply -f k8s/database/
 
 Any pods within the Kubernetes cluster that need to connect to the database can do so by using the service name `database`.
 
-#### 5. Add API Secret with database environment variables
+#### 5. Add the API Deployment and Service configuration to the cluster
 
-We'll add the environment variables for the database connection.
+First, we'll set the environment variables for the database connection using a Secret resource.
 
 ```bash
 kubectl apply -f k8s/secret.yaml
 ```
 
-#### 6. Add the API Deployment and Service configuration to the cluster
-
-We'll create a Deployment for both versions of the API and expose them as Services.
+Then, we'll create a Deployment for both versions of the API and expose them as Services.
 
 ```bash
 kubectl apply -f k8s/api/v1
@@ -242,7 +240,7 @@ kubectl apply -f k8s/api/v2
 
 Each Deployment will create three replicas of the API pod, and the Service will expose the API on port 8080.
 
-#### 7. Install Nginx Ingress controller
+#### 6. Install Nginx Ingress controller
 
 Install the Nginx Ingress controller using the following command:
 
@@ -256,7 +254,7 @@ This will also create the `ingress-nginx` namespace. You can check the pods runn
 kubectl get pods -n ingress-nginx
 ```
 
-#### 8. Apply the Ingress configuration to the nginx controller
+#### 7. Apply the Ingress configuration to the nginx controller
 
 The command below will wait for the Nginx Ingress controller pod to be ready, and then apply the Ingress configuration to it:
 
@@ -264,7 +262,7 @@ The command below will wait for the Nginx Ingress controller pod to be ready, an
 kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=180s && kubectl apply -f ./nginx/ingress-nginx.yaml
 ```
 
-#### 9. Port forward the Nginx controller Service
+#### 8. Port forward the Nginx controller Service
 
 The following command will allow you to access the Nginx controller (and hence the API) from your localhost:
 
