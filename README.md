@@ -508,7 +508,7 @@ To install Fortio on linux, we'll download and install a release directly from t
 
 ```sh
 wget https://github.com/fortio/fortio/releases/download/v1.63.9/fortio_1.63.9_amd64.deb
-dpkg -i fortio_1.63.9_amd64.deb
+sudo dpkg -i fortio_1.63.9_amd64.deb
 ```
 
 #### Windows
