@@ -164,10 +164,10 @@ All the commands in the following section should be run from the root of the pro
 
 #### 1. Create the cluster
 
-We'll create a Kubernetes cluster called `redes-cluster` with one control plane and two worker nodes. The configuration for the cluster is defined in the [`cluster-config.yaml`](kind/cluster-config.yaml) file.
+We'll create a Kubernetes cluster called `redes-cluster` with one control plane and two worker nodes. The configuration for the cluster is defined in the [`cluster-config.yaml`](k8s/cluster-config.yaml) file.
 
 ```bash
-kind create cluster --config ./kind/cluster-config.yaml --name redes-cluster
+kind create cluster --config ./k8s/cluster-config.yaml --name redes-cluster
 ```
 
 You can check your running clusters with:
