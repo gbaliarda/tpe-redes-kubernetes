@@ -383,6 +383,8 @@ kubectl label ns default istio-injection=enabled
 kubectl label ns ingress-nginx istio-injection=enabled
 ```
 
+> In case the last command fails due to the `ingress-nginx` namespace being deleted, re-create it with `kubectl create ns ingress-nginx` and re-run the last command.
+
 Now we can finally reinstate the previously removed manifests, using:
 
 ```sh
