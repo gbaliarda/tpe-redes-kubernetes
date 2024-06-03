@@ -383,7 +383,7 @@ kubectl label ns default istio-injection=enabled
 kubectl label ns ingress-nginx istio-injection=enabled
 ```
 
-> In case the last command fails due to the `ingress-nginx` namespace being deleted, re-create it with `kubectl create ns ingress-nginx` and re-run the last command.
+> **Note**: in case the last command fails due to the `ingress-nginx` namespace being deleted, re-create it with `kubectl create ns ingress-nginx` and re-run the last command.
 
 Now we can finally reinstate the previously removed manifests, using:
 
@@ -482,11 +482,15 @@ Wait for the Kiali pod to be ready, and then init the dashboard using `istioctl`
 istioctl dashboard kiali
 ```
 
-This should open up the Kiali UI at `http://localhost:20001`. There you can monitor multiple things, such as the _Traffic Graph_, which should look as follows:
+This should open up the Kiali UI at `http://localhost:20001`. There, you can see information about the cluster, such as the _Traffic Graph_.
+
+After generating some traffic, which we'll see how to do in the next section, the _Traffic Graph_ should look like this:
 
 <img loading="lazy" src="images/traffic_graph.png" alt="Kiali traffic graph" />
 
-Note that there must be traffic on the cluster, otherwise the previous graph will only contain idle nodes. Said traffic can be generated using the command shown on the following section.
+> Select all the namespaces at the top of the page to see the traffic between the different services.
+
+Note that there must be traffic on the cluster, otherwise the previous graph will only contain idle nodes. We'll see how to generate traffic in the next section.
 
 ### Generating Traffic
 
