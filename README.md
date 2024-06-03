@@ -47,8 +47,8 @@
     - [Run](#run)
   - [Generating Traffic](#generating-traffic)
 - [Stress testing the cluster](#stress-testing-the-cluster)
-  - [Install](#install-2)
-  - [Run](#run-1)
+  - [Install Fortio](#install-fortio)
+  - [Run Fortio](#run-fortio)
   - [Load Tests](#load-tests)
     - [Light Traffic Test](#light-traffic-test)
     - [Medium Traffic Test](#medium-traffic-test)
@@ -511,7 +511,7 @@ while sleep 1; do curl "localhost:8080/v1" && curl "localhost:8080/v2"; done
 
 To test the cluster capabilities, we'll use a load testing tool called [Fortio](https://github.com/fortio/fortio).
 
-### Install
+### Install Fortio
 
 - Linux
 
@@ -526,7 +526,7 @@ To test the cluster capabilities, we'll use a load testing tool called [Fortio](
 
     Download a [zipped release](https://github.com/fortio/fortio/releases/download/v1.63.9/fortio_win_1.63.9.zip) and extract _fortio.exe_ to any location.
 
-### Run
+### Run Fortio
 
 To run Fortio, we'll use its UI interface, which we can access by running:
 
