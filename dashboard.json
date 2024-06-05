@@ -89,7 +89,8 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "fixedColor": "orange",
+            "mode": "fixed"
           },
           "custom": {
             "axisBorderShow": false,
@@ -128,12 +129,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "orange",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
@@ -315,7 +312,8 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "fixedColor": "purple",
+            "mode": "fixed"
           },
           "custom": {
             "axisBorderShow": true,
@@ -408,7 +406,7 @@
           "refId": "A"
         }
       ],
-      "title": "Process memory",
+      "title": "NGINX memory",
       "type": "timeseries"
     }
   ],
@@ -466,7 +464,7 @@
     ]
   },
   "time": {
-    "from": "now-1m",
+    "from": "now-5m",
     "to": "now"
   },
   "timeRangeUpdatedDuringEditOrView": false,
