@@ -568,8 +568,8 @@ Although the general response time has increased, the cluster is still able to h
 
 Finally, we increase the values used on the previous test to critical ones, where the requests can't be handled, resulting on a failure of the load balancer and most of the requests being resolved as errors.
 
-- Concurrent connections: 1000
-- QPS: 10000
+- Concurrent connections: 10000
+- QPS: 100000
 - Duration: 30s
 
 Querying to http://localhost:8080/v1
