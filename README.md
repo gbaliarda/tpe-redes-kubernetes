@@ -46,6 +46,13 @@
     - [Install](#install-1)
     - [Run](#run)
   - [Generating Traffic](#generating-traffic)
+- [Stress testing the cluster](#stress-testing-the-cluster)
+  - [Install Fortio](#install-fortio)
+  - [Run Fortio](#run-fortio)
+  - [Load Tests](#load-tests)
+    - [Light Traffic Test](#light-traffic-test)
+    - [Medium Traffic Test](#medium-traffic-test)
+    - [Heavy Traffic Test](#heavy-traffic-test)
 
 ## Pre-requisites
 
@@ -383,6 +390,8 @@ kubectl label ns default istio-injection=enabled
 kubectl label ns ingress-nginx istio-injection=enabled
 ```
 
+> **Note**: in case the last command fails due to the `ingress-nginx` namespace being deleted, re-create it with `kubectl create ns ingress-nginx` and re-run the last command.
+
 Now we can finally reinstate the previously removed manifests, using:
 
 ```sh
@@ -480,11 +489,15 @@ Wait for the Kiali pod to be ready, and then init the dashboard using `istioctl`
 istioctl dashboard kiali
 ```
 
-This should open up the Kiali UI at `http://localhost:20001`. There you can monitor multiple things, such as the _Traffic Graph_, which should look as follows:
+This should open up the Kiali UI at `http://localhost:20001`. There, you can see information about the cluster, such as the _Traffic Graph_.
+
+After generating some traffic, which we'll see how to do in the next section, the _Traffic Graph_ should look like this:
 
 <img loading="lazy" src="images/traffic_graph.png" alt="Kiali traffic graph" />
 
-Note that there must be traffic on the cluster, otherwise the previous graph will only contain idle nodes. Said traffic can be generated using the command shown on the following section.
+> Select all the namespaces at the top of the page to see the traffic between the different services.
+
+Note that there must be traffic on the cluster, otherwise the previous graph will only contain idle nodes. We'll see how to generate traffic in the next section.
 
 ### Generating Traffic
 
@@ -494,47 +507,47 @@ Traffic through both APIs running on the cluster can be generated using:
 while sleep 1; do curl "localhost:8080/v1" && curl "localhost:8080/v2"; done
 ```
 
-# Testing
+## Stress testing the cluster
 
-## Fortio
+To test the cluster capabilities, we'll use a load testing tool called [Fortio](https://github.com/fortio/fortio).
 
-To test the cluster capabilities, we'll use a load testing tool called Fortio.
+### Install Fortio
 
-### Install
+- Linux
 
-#### Linux
+    Download and install a release directly from the Fortio repository.
 
-To install Fortio on linux, we'll download and install a release directly from the fortio repository page.
+    ```sh
+    wget https://github.com/fortio/fortio/releases/download/v1.63.9/fortio_1.63.9_amd64.deb
+    sudo dpkg -i fortio_1.63.9_amd64.deb
+    ```
 
-```sh
-wget https://github.com/fortio/fortio/releases/download/v1.63.9/fortio_1.63.9_amd64.deb
-dpkg -i fortio_1.63.9_amd64.deb
-```
+- Windows
 
-#### Windows
+    Download a [zipped release](https://github.com/fortio/fortio/releases/download/v1.63.9/fortio_win_1.63.9.zip) and extract _fortio.exe_ to any location.
 
-On Windows, [download](https://github.com/fortio/fortio/releases/download/v1.63.9/fortio_win_1.63.9.zip) and extract _fortio.exe_ to any location.
+### Run Fortio
 
-### Run
+To run Fortio, we'll use its UI interface, which we can access by running:
 
-To run fortio, we'll use its UI interface, which runs on a server. To instance said server, run:
-
-```
+```bash
 fortio server -http-port localhost:8090
 ```
 
-Then, you'll be promted to the page http://localhost:8090, where you can choose multiple request options, such as:
-- Number of concurrent connections
-- QPS (Queries Per Second) of each connection
-- Duration of the test
+You'll be prompted to http://localhost:8090 on your browser, where you can choose multiple request options, such as:
+- Number of concurrent connections.
+- QPS (Queries Per Second) of each connection.
+- Duration of the test.
 
 <img loading="lazy" src="images/fortio_ui.png" alt="Kiali traffic graph" />
 
-## Load Tests
+### Load Tests
 
 Finally, some tests were run to test the API capabilities, such as response time and number of connections managed.
 
-### Light Traffic Test
+> Grafana can be used to monitor the cluster's performance during the tests.
+
+#### Light Traffic Test
 
 On this test, we check that the API handles requests correctly depending on the URL and resource queried. E.g. A request to http://localhost:8080/v1 should be an accepted request and return a basic response, whereas a request to an invalid URL such as http://localhost:8080 should not be handled at all.
 
@@ -542,15 +555,15 @@ On this test, we check that the API handles requests correctly depending on the 
 - QPS: 100
 - Duration: 5s
 
-Querying to http://localhost:8080/v1
+Querying to http://localhost:8080/v1:
 
 <img loading="lazy" src="images/light_success.png" alt="Kiali traffic graph" />
 
-Querying to http://localhost:8080
+Querying to http://localhost:8080:
 
 <img loading="lazy" src="images/light_error.png" alt="Kiali traffic graph" />
 
-### Medium Traffic Test
+#### Medium Traffic Test
 
 On this test, we push the API further increasing both the number of concurrent connections and QPS used. We'll also increase the duration of the test to better emulate a real-world situation of multiple incoming requests to the cluster.
 
@@ -558,13 +571,13 @@ On this test, we push the API further increasing both the number of concurrent c
 - QPS: 10000
 - Duration: 30s
 
-Querying to http://localhost:8080/v1
+Querying to http://localhost:8080/v1:
 
 <img loading="lazy" src="images/medium_traffic.png" alt="Kiali traffic graph" />
 
 Although the general response time has increased, the cluster is still able to handle all of the incoming requests.
 
-### Heavy Traffic Test
+#### Heavy Traffic Test
 
 Finally, we increase the values used on the previous test to critical ones, where the requests can't be handled, resulting on a failure of the load balancer and most of the requests being resolved as errors.
 
@@ -572,6 +585,6 @@ Finally, we increase the values used on the previous test to critical ones, wher
 - QPS: 100000
 - Duration: 30s
 
-Querying to http://localhost:8080/v1
+Querying to http://localhost:8080/v1:
 
 <img loading="lazy" src="images/heavy_traffic.png" alt="Kiali traffic graph" />
