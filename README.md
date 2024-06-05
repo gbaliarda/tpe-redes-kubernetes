@@ -36,12 +36,12 @@
   - [Cleanup](#cleanup)
 - [Test the APIs](#test-the-apis)
 - [Cluster Monitoring](#cluster-monitoring)
-  - [Istio](#istio)
-    - [Download](#download)
-    - [Install in the cluster](#install-in-the-cluster)
   - [Prometheus \& Grafana](#prometheus--grafana)
     - [Install](#install)
     - [Grafana Dashboard](#grafana-dashboard)
+  - [Istio](#istio)
+    - [Download](#download)
+    - [Install in the cluster](#install-in-the-cluster)
   - [Kiali](#kiali)
     - [Install](#install-1)
     - [Run](#run)
@@ -345,6 +345,62 @@ We'll now explore the different functionalities of the API and the differences b
 
 ## Cluster Monitoring
 
+### Prometheus & Grafana
+
+Prometheus is an open-source monitoring and alerting toolkit designed for reliability and scalability, used to collect metrics from monitored targets and then store and query those metrics. Grafana is a visualization tool that integrates with various data sources, including Prometheus, allowing users to create customizable dashboards and visualize metrics in real-time.
+
+We'll use Prometheus to collect metrics from Nginx, and Grafana to visualize the collected data.
+
+#### Install
+
+Before installing Prometheus and Grafana, make sure to have the Nginx controller and service running. If not, refer to steps 6 and 7 of the "Setup Kubernetes Cluster" section.
+
+To install Prometheus and Grafana in the cluster, run:
+
+```sh
+kubectl apply --kustomize k8s/prometheus
+kubectl apply --kustomize k8s/grafana
+```
+
+You can check the running pods with:
+
+```bash
+kubectl get pods -n ingress-nginx
+```
+
+#### Grafana Dashboard
+
+To access the Grafana dashboard, you must forward a port on your local machine (e.g. 3000) to port 3000 of the Grafana service running in the `ingress-nginx` namespace within your Kubernetes cluster, enabling direct access to the Grafana dashboard from your local browser.
+
+```sh
+kubectl port-forward -n ingress-nginx service/grafana 3000:3000
+```
+
+The Grafana dashboard will be accessible on `localhost:3000`, where the default username and password will both be `admin`.
+
+To load the example dashboard from [`dashboard.json`](dashboard.json), follow these steps:
+
+1. Using the search bar, go to "Data Sources".
+2. Click on "Add data source".
+3. Select Prometheus.
+4. Enter the configuration details. The only mandatory one is the prometheus server URL, which should be `http://prometheus-server.ingress-nginx.svc.cluster.local:9090`.
+
+    <img loading="lazy" src="images/prometheus_url.png" alt="Prometheus url" />
+
+5. Click on "Save and Test" at the end of the page. Then prometheus' availability will be queried, which should output a popup message as shown.
+
+    <img loading="lazy" src="images/save_and_test.png" alt="Save and test prometheus API" />
+
+6. On the side menu, click on Dashboards. Then, click on New -> Import -> Upload dashboard JSON file.
+7. Load the `dashboard.json` file located on the root of the project.
+8. Select a Prometheus data source (you should see the default prometheus data source created on step 4). After these steps, the import screen should be as follows.
+
+    <img loading="lazy" src="images/import_dashboard.png" alt="Final import screen" />
+
+9. Click "Import". After that, you should be redirected to the home page and shown the imported dashboard.
+
+    <img loading="lazy" src="images/dashboard_screen.png" alt="Home page with dashboard" />
+
 ### Istio
 
 #### Download
@@ -406,62 +462,6 @@ kubectl apply -f ./nginx/controller-nginx.yaml
 
 kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=180s && kubectl apply -f ./nginx/ingress-nginx.yaml
 ```
-
-### Prometheus & Grafana
-
-Prometheus is an open-source monitoring and alerting toolkit designed for reliability and scalability, used to collect metrics from monitored targets and then store and query those metrics. Grafana is a visualization tool that integrates with various data sources, including Prometheus, allowing users to create customizable dashboards and visualize metrics in real-time.
-
-We'll use Prometheus to collect metrics from Nginx, and Grafana to visualize the collected data.
-
-#### Install
-
-Before installing Prometheus and Grafana, make sure to have the Nginx controller and service running. If not, refer to steps 6 and 7 of the "Setup Kubernetes Cluster" section.
-
-To install Prometheus and Grafana in the cluster, run:
-
-```sh
-kubectl apply --kustomize k8s/prometheus
-kubectl apply --kustomize k8s/grafana
-```
-
-You can check the running pods with:
-
-```bash
-kubectl get pods -n ingress-nginx
-```
-
-#### Grafana Dashboard
-
-To access the Grafana dashboard, you must forward a port on your local machine (e.g. 3000) to port 3000 of the Grafana service running in the `ingress-nginx` namespace within your Kubernetes cluster, enabling direct access to the Grafana dashboard from your local browser.
-
-```sh
-kubectl port-forward -n ingress-nginx service/grafana 3000:3000
-```
-
-The Grafana dashboard will be accessible on `localhost:3000`, where the default username and password will both be `admin`.
-
-To load the example dashboard from [`dashboard.json`](dashboard.json), follow these steps:
-
-1. Using the search bar, go to "Data Sources".
-2. Click on "Add data source".
-3. Select Prometheus.
-4. Enter the configuration details. The only mandatory one is the prometheus server URL, which should be `http://prometheus-server.ingress-nginx.svc.cluster.local:9090`.
-
-    <img loading="lazy" src="images/prometheus_url.png" alt="Prometheus url" />
-
-5. Click on "Save and Test" at the end of the page. Then prometheus' availability will be queried, which should output a popup message as shown.
-
-    <img loading="lazy" src="images/save_and_test.png" alt="Save and test prometheus API" />
-
-6. On the side menu, click on Dashboards. Then, click on New -> Import -> Upload dashboard JSON file.
-7. Load the `dashboard.json` file located on the root of the project.
-8. Select a Prometheus data source (you should see the default prometheus data source created on step 4). After these steps, the import screen should be as follows.
-
-    <img loading="lazy" src="images/import_dashboard.png" alt="Final import screen" />
-
-9. Click "Import". After that, you should be redirected to the home page and shown the imported dashboard.
-
-    <img loading="lazy" src="images/dashboard_screen.png" alt="Home page with dashboard" />
 
 ### Kiali
 
